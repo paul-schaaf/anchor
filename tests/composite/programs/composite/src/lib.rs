@@ -12,7 +12,7 @@ mod composite {
         Ok(())
     }
 
-    pub fn handle_raw_data<'_>(_ctx: Context<RawData>, raw_data: &'_ [u8]) -> ProgramResult {
+    pub fn handle_raw_data<'info, 'a, 'b, 'c, 'd>(_ctx: Context<'a, 'b, 'c, 'info, RawData<'info>>, raw_data: &'d [u8]) -> ProgramResult {
         Ok(())
     }
 
