@@ -137,12 +137,24 @@ pub fn generate(program: &Program) -> proc_macro2::TokenStream {
                 let sighash_arr = sighash(SIGHASH_GLOBAL_NAMESPACE, name);
                 let sighash_tts: proc_macro2::TokenStream =
                     format!("{:?}", sighash_arr).parse().unwrap();
-                quote! {
-                    impl anchor_lang::InstructionData for #ix_name_camel {
-                        fn data(&self) -> Vec<u8> {
-                            let mut d = #sighash_tts.to_vec();
-                            d.append(&mut self.try_to_vec().expect("Should always serialize"));
-                            d
+                if ix.args.len() == 1 && ix.args[0].name.to_string() == String::from("raw_data") {
+                    quote! {
+                        impl anchor_lang::InstructionData for #ix_name_camel {
+                            fn data(&self) -> Vec<u8> {
+                                let mut d = #sighash_tts.to_vec();
+                                d.append(&mut self.raw_data.to_vec());
+                                d
+                            }
+                        }
+                    }
+                } else {
+                    quote! {
+                        impl anchor_lang::InstructionData for #ix_name_camel {
+                            fn data(&self) -> Vec<u8> {
+                                let mut d = #sighash_tts.to_vec();
+                                d.append(&mut self.try_to_vec().expect("Should always serialize"));
+                                d
+                            }
                         }
                     }
                 }
@@ -156,6 +168,15 @@ pub fn generate(program: &Program) -> proc_macro2::TokenStream {
 
                     #ix_data_trait
                 }
+            } else if ix.args.len() == 1 && ix.args[0].name.to_string() == String::from("raw_data")
+            {
+                quote! {
+                    /// Instruction.
+                    pub struct #ix_name_camel<'a> {
+                        pub raw_data: &'a [u8]
+                    }
+                    #ix_data_trait
+                }
             } else {
                 quote! {
                     /// Instruction.
@@ -163,7 +184,6 @@ pub fn generate(program: &Program) -> proc_macro2::TokenStream {
                     pub struct #ix_name_camel {
                         #(#raw_args),*
                     }
-
                     #ix_data_trait
                 }
             }

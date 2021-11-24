@@ -593,6 +593,22 @@ pub fn generate(program: &Program) -> proc_macro2::TokenStream {
             let ix_method_name = &ix.raw_method.sig.ident;
             let anchor = &ix.anchor_ident;
             let variant_arm = generate_ix_variant(ix.raw_method.sig.ident.to_string(), &ix.args);
+            let first_arg_name = ix_arg_names
+                .get(0)
+                .map(ToString::to_string)
+                .unwrap_or_default();
+
+            let derialize_data = if ix_arg_names.len() > 0
+                && first_arg_name == String::from("raw_data")
+            {
+                quote! {let raw_data = ix_data;}
+            } else {
+                quote! { let ix = instruction::#ix_name::deserialize(&mut &ix_data[..])
+                    .map_err(|_| anchor_lang::__private::ErrorCode::InstructionDidNotDeserialize)?;
+                    let instruction::#variant_arm = ix;
+
+                }
+            };
 
             quote! {
                 #[inline(never)]
@@ -602,9 +618,7 @@ pub fn generate(program: &Program) -> proc_macro2::TokenStream {
                     ix_data: &[u8],
                 ) -> ProgramResult {
                     // Deserialize data.
-                    let ix = instruction::#ix_name::deserialize(&mut &ix_data[..])
-                        .map_err(|_| anchor_lang::__private::ErrorCode::InstructionDidNotDeserialize)?;
-                    let instruction::#variant_arm = ix;
+                    #derialize_data
 
                     // Deserialize accounts.
                     let mut remaining_accounts: &[AccountInfo] = accounts;

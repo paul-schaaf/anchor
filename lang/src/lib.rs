@@ -197,7 +197,7 @@ pub trait ZeroCopy: Discriminator + Copy + Clone + Zeroable + Pod {}
 /// `Sha256(<namespace>::<method_name>)[..8] || BorshSerialize(args)`.
 /// `args` is a borsh serialized struct of named fields for each argument given
 /// to an instruction.
-pub trait InstructionData: AnchorSerialize {
+pub trait InstructionData {
     fn data(&self) -> Vec<u8>;
 }
 

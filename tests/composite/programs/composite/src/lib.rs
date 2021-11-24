@@ -12,6 +12,11 @@ mod composite {
         Ok(())
     }
 
+    pub fn handle_raw_data<'_>(_ctx: Context<RawData>, raw_data: &'_ [u8]) -> ProgramResult {
+        Ok(())
+    }
+
+
     pub fn composite_update(
         ctx: Context<CompositeUpdate>,
         dummy_a: u64,
@@ -25,6 +30,11 @@ mod composite {
 
         Ok(())
     }
+}
+
+#[derive(Accounts)]
+pub struct RawData<'info> {
+    pub account: AccountInfo<'info>
 }
 
 #[derive(Accounts)]
