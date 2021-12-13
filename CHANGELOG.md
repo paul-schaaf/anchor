@@ -11,6 +11,10 @@ incremented for features.
 
 ## [Unreleased]
 
+### Fixes
+
+* ts: fix `translateAddress` which currently leads to failing browser code. Now uses `PublicKey` constructor instead of prototype chain constructor name checking which doesn't work in the presence of code minifying/mangling([1138](https://github.com/project-serum/anchor/pull/1138))
+
 ### Features
 
 * lang,ts,ci,cli,docs: update solana toolchain([#1133](https://github.com/project-serum/anchor/pull/1133))
