@@ -701,6 +701,8 @@ pub fn generate(program: &Program) -> proc_macro2::TokenStream {
                     anchor_lang::solana_program::program::set_return_data(&result.try_to_vec().unwrap());
                 },
             };
+            let logs = ix_arg_names.iter()
+                .map(|arg| {let arg = arg; return quote!{anchor_lang::prelude::msg!("Deserialized: {:?}", #arg);}}).take(12).collect::<Vec<_>>();
             quote! {
                 #[inline(never)]
                 pub fn #ix_method_name(
@@ -728,6 +730,8 @@ pub fn generate(program: &Program) -> proc_macro2::TokenStream {
                         &mut __bumps,
                     )?;
 
+                    #(#logs)*
+/* 
                     // Invoke user defined handler.
                     let result = #program_name::#ix_method_name(
                         anchor_lang::context::Context::new(
@@ -737,12 +741,13 @@ pub fn generate(program: &Program) -> proc_macro2::TokenStream {
                             __bumps,
                         ),
                         #(#ix_arg_names),*
-                    )?;
+                    )?; */
 
                     // Maybe set Solana return data.
-                    #maybe_set_return_data
+                    //#maybe_set_return_data
 
                     // Exit routine.
+                    panic!();
                     accounts.exit(program_id)
                 }
             }
